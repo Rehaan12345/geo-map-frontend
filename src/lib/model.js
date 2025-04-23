@@ -49,3 +49,27 @@ export async function getDocuments(collection) {
     return -1;
   }
 }
+
+// @ts-nocheck
+/**
+ * @param {undefined} [data]
+ */
+export async function getScrape(data) {
+  try {
+    console.log(JSON.stringify({data}))
+    const res = await fetch(URL + 'scrape-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data })
+    });
+
+    console.log(res);
+
+    return 0;
+  } catch (error) {
+    console.log(error);
+    return -1;
+  }
+}

@@ -100,6 +100,7 @@ async function addAllMarkers() {
 
 <style>
 #map {
+  margin-top: 2rem;
   position: absolute;
   top: 0;
   bottom: 0;

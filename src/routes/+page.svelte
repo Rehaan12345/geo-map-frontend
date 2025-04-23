@@ -1,9 +1,19 @@
 <script>
+    // @ts-nocheck
     import Map from "./Map.svelte";
-    import { addDocument } from "$lib/model";
+    import { addDocument, getScrape } from "$lib/model";
+	import { ButtonGroup, Button, Modal} from "flowbite-svelte";
+    import { writable } from "svelte/store";
+
+    let showScrapeModal = writable(false);
 
     let name = "";
     let coords = ""
+
+    let scrape;
+    let category = "realestate";
+    let location = "boston";
+    let searchAmount = 10;
 
     const submit = async () => {
         const xcord = coords.substring(0, coords.indexOf(","));
@@ -26,7 +36,35 @@
         }
     }
 
+    const handleGetScrape = async () => {
+        try {
+            const toSend = {
+                category: category,
+                location: location,
+                searchamount: searchAmount
+            }
+            scrape = await getScrape(toSend);
+        } catch (error) {
+            console.log("error scraping: " + error);
+        }
+    }
+
 </script>
+
+<style>
+    .mapcontainer {
+        margin-top: 5rem;
+    }
+
+    .buttongroup {
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* position: fixed; */
+    }
+</style>
+
 <!-- 
 <form on:submit={submit}>
     <label for="name">Name</label>
@@ -36,4 +74,23 @@
     <input type="submit">
 </form> -->
 
-<Map></Map>
+<Modal class="min-w-full" open={$showScrapeModal} on:close={() => {showScrapeModal.set(false); }}>
+
+    {scrape}
+    
+</Modal>
+
+<div class="buttongroup">
+    <ButtonGroup class="space-x-px">
+        <Button pill color="purple" on:click={() => {
+            handleGetScrape();
+            showScrapeModal.set(true);
+        }}>Profile</Button>
+        <Button pill color="purple">Settings</Button>
+        <Button pill color="purple">Messages</Button>
+    </ButtonGroup>
+</div>
+
+<div class="mapcontainer">
+    <Map></Map>
+</div>
