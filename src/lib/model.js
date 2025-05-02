@@ -67,7 +67,11 @@ export async function getScrape(data) {
 
     console.log(res);
 
-    return 0;
+    const resp = await res.json();
+
+    console.log(resp.data);
+
+    return {"status": 0, "data": resp.data};
   } catch (error) {
     console.log(error);
     return -1;
