@@ -2,11 +2,18 @@
     // @ts-nocheck
     import Map from "./Map.svelte";
     import { addDocument, getScrape } from "$lib/model";
-	import { ButtonGroup, Button, Modal, Alert } from "flowbite-svelte";
+	import { ButtonGroup, Button, Modal, Alert, Dropdown, DropdownItem, DropdownDivider, DropdownHeader } from "flowbite-svelte";
     import { writable } from "svelte/store";
     import ScrapeForm from "./ScrapeForm.svelte";
+    import { ChevronDownOutline } from "flowbite-svelte-icons";
+	import { onMount } from "svelte";
+	import { collection } from "firebase/firestore";
+	import { read } from "$app/server";
+
+    let ready = writable(false);
 
     let showScrapeModal = writable(false);
+    let currCategory = "";
 
     let name = "";
     let coords = ""
@@ -17,6 +24,8 @@
     let searchAmount = 1;
 
     let data;
+
+    let categories = []
 
     const submit = async () => {
         const xcord = coords.substring(0, coords.indexOf(","));
@@ -57,19 +66,31 @@
         }
     }
 
+    onMount(async () => {
+        ready.set(false);
+        if (categories.length > 1) { currCategory = categories[0]; }
+        const URL = import.meta.env.VITE_URL;
+        try {
+            const res = await fetch(URL + 'get-colls');
+        if (!res.ok) throw new Error('Failed to fetch');
+            categories = await res.json();
+            currCategory = categories[0];
+        } catch (err) {
+            console.log(err);
+        }
+        ready.set(true);
+    })
+
 </script>
 
 <style>
-    .mapcontainer {
-        margin-top: 5rem;
-    }
 
     .buttongroup {
         z-index: 100;
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 5rem;
     }
 </style>
 
@@ -82,23 +103,34 @@
     <input type="submit">
 </form> -->
 
-<Modal class="min-w-full" open={$showScrapeModal} on:close={() => {showScrapeModal.set(false); }}>
+{#if $ready}
 
-    <ScrapeForm></ScrapeForm>
-    
-</Modal>
+    <Modal class="min-w-full" open={$showScrapeModal} on:close={() => {showScrapeModal.set(false); }} size="xl">
 
-<div class="buttongroup">
-    <ButtonGroup class="space-x-px">
-        <Button pill color="purple" on:click={() => {
-            // handleGetScrape();
-            showScrapeModal.set(true);
-        }}>Profile</Button>
-        <Button pill color="purple">Settings</Button>
-        <Button pill color="purple">Messages</Button>
-    </ButtonGroup>
-</div>
+        <ScrapeForm></ScrapeForm>
+        
+    </Modal>
 
-<div class="mapcontainer">
-    <Map></Map>
-</div>
+    <div class="buttongroup">
+        <ButtonGroup class="space-x-px">
+            <Button pill color="purple" on:click={() => {
+                showScrapeModal.set(true);
+            }}>Scrape</Button>
+            <Button pill color="green">Category<ChevronDownOutline class="ms-2 h-6 w-6 text-white dark:text-white" /></Button>
+            <Dropdown>
+                {#each categories as c}
+                    <DropdownItem on:click={() => {currCategory = c}}>{c}</DropdownItem>
+                {/each}
+            </Dropdown>
+        </ButtonGroup>
+    </div>
+
+    <div class="mapcontainer">
+        {#each categories as c}
+            {#if c == currCategory}
+                <Map useCategory={c}></Map>
+            {/if}
+        {/each}
+    </div>
+
+{/if}

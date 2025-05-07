@@ -12,6 +12,8 @@ import { addDocument, getDocuments } from '$lib/model';
 import { writable } from 'svelte/store';
 import { tick } from 'svelte';
 
+export let useCategory = "tech-companies";
+
 let ready = writable(false);
 
 const cambridge = fromLonLat([-71.10366950263109, 42.36596281768288]);
@@ -22,7 +24,7 @@ let docs;
 
 onMount(async () => {
 
-  docs = await getDocuments("tech-companies");
+  docs = await getDocuments(useCategory);
 
   console.log(docs);
 

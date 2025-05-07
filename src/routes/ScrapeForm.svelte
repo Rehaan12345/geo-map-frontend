@@ -6,8 +6,10 @@
     import { addDocument, getScrape } from "$lib/model";
     import { writable } from 'svelte/store';
 	import { load } from 'ol/Image';
+	import { disable } from 'ol/rotationconstraint';
 
     let loading = writable(false);
+    let uploadMapLoading = writable(false);
 
     let category;
     let location;
@@ -39,6 +41,21 @@
             console.log("error scraping: " + error);
         } finally {
             loading.set(false);
+        }
+    }
+
+    const handleUploadToMap = async () => {
+        uploadMapLoading.set(true);
+        try {
+            for (let i = 0; i < info.length; i++) {
+                info[i]["collection"] = category;
+                const res = await addDocument(info[i]);
+                console.log(res);
+                console.log("done");
+            }
+            uploadMapLoading.set(false);
+        } catch (error) {
+            console.log("error! " + error);
         }
     }
 </script>
@@ -79,10 +96,41 @@
 
 {#if scrape}
 
-    {#each info as i}
+    <div class="bg-white relative shadow-md sm:rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500">
+                <thead class="text-lg text-gray-700 bg-gray-50">
+                    <tr>
+                        {#each Object.entries(info[0]) as [key, value]}
+                            {#if key != 'id'}
+                                <th scope="col" class="px-4 py-3">{key}</th>
+                            {/if}
+                        {/each}
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each info as i}
+                    <tr class="border-b tablerow">
+                        {#each Object.entries(i) as [key, value]}
+                            <td class="px-4 py-3">
+                                {value}
+                            </td>
+                        {/each}
+                    </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-        {i.name}
-
-    {/each}
+    {#if $uploadMapLoading}
+        <Button outline color="green" disabled>
+            <Spinner color="primary" size={6}/>
+        </Button>
+    {:else}
+        <Button outline color="green" on:click={() => { handleUploadToMap(); }}>
+            Upload to map
+        </Button>
+    {/if}
 
 {/if}
