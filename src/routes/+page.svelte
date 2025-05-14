@@ -106,9 +106,13 @@
 {#if $ready}
 
     <Modal class="min-w-full" open={$showScrapeModal} on:close={() => {showScrapeModal.set(false); }} size="xl">
-
-        <ScrapeForm></ScrapeForm>
         
+        {#each categories as c}
+            {#if c == currCategory}
+            <ScrapeForm useCategory={c}></ScrapeForm>
+            {/if}
+        {/each}
+
     </Modal>
 
     <div class="buttongroup">

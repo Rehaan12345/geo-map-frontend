@@ -2,11 +2,12 @@
     // @ts-nocheck
 
 	import { Section } from 'flowbite-svelte-blocks';
-	import { Label, Input, Button, Select, Textarea, Spinner, Toggle } from 'flowbite-svelte';
-    import { addDocument, getScrape } from "$lib/model";
+	import { Label, Input, Button, Select, Textarea, Spinner, Toggle, ButtonGroup } from 'flowbite-svelte';
+    import { addDocument, getScrape, getDocuments } from "$lib/model";
     import { writable } from 'svelte/store';
 	import { load } from 'ol/Image';
 	import { disable } from 'ol/rotationconstraint';
+	import { onMount } from 'svelte';
 
     let loading = writable(false);
     let uploadMapLoading = writable(false);
@@ -58,6 +59,47 @@
             console.log("error! " + error);
         }
     }
+
+    function downloadData(dict, filename = 'data.csv') {
+        if (!dict || typeof dict !== 'object') {
+            console.error('Invalid input: not an object');
+            return;
+        }
+
+        const items = Array.isArray(dict) ? dict : [dict]; // allow both single object or list of dicts
+        const keys = Object.keys(items[0]);
+
+        const csvRows = [
+            keys.join(','), // header row
+            ...items.map(item =>
+            keys.map(k => {
+                const val = item[k];
+                return typeof val === 'string' && val.includes(',')
+                ? `"${val.replace(/"/g, '""')}"`
+                : val;
+            }).join(',')
+            )
+        ];
+
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.setAttribute('href', url);
+        a.setAttribute('download', filename);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    onMount(async () => {
+        info = await getDocuments(useCategory);
+        console.log(info);
+    })
+
+    export let useCategory = "tech-companies";
 </script>
 
 <Section name="crudcreateform">
@@ -76,9 +118,7 @@
 				<Label for="searchamount" class="mb-2">Search Amount</Label>
 				<Input type="number" id="searchamount" placeholder="10" required bind:value={searchAmount}/>
 			</div>
-			<!-- <div class="w-full"> -->
-                <Toggle checked={headless} on:change={() => {headless = !headless}}>Watch it happen</Toggle>
-			<!-- </div> -->
+            <Toggle checked={headless} on:change={() => {headless = !headless}}>Watch it happen</Toggle>
             <div class="sm:col-span-2">
                 {#if $loading}
                     <Button type="submit" class="w-32" disabled>
@@ -90,11 +130,14 @@
                     </Button>
                 {/if}
             </div>
+            <Button size="xs" color="green" outline type="button" class="w-32" on:click={() => {downloadData(info)}}>
+                Download Data
+            </Button>
 		</div>
 	</form>
 </Section>
 
-{#if scrape}
+{#if info}
 
     <div class="bg-white relative shadow-md sm:rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
@@ -112,9 +155,11 @@
                     {#each info as i}
                     <tr class="border-b tablerow">
                         {#each Object.entries(i) as [key, value]}
-                            <td class="px-4 py-3">
-                                {value}
-                            </td>
+                            {#if key != 'id'}
+                                <td class="px-4 py-3">
+                                    {value}
+                                </td>
+                            {/if}
                         {/each}
                     </tr>
                     {/each}
@@ -123,14 +168,19 @@
         </div>
     </div>
 
-    {#if $uploadMapLoading}
-        <Button outline color="green" disabled>
-            <Spinner color="primary" size={6}/>
+    <ButtonGroup>
+        {#if $uploadMapLoading}
+            <Button outline color="green" disabled>
+                <Spinner color="primary" size={6}/>
+            </Button>
+        {:else}
+            <Button outline color="green" on:click={() => { handleUploadToMap(); }}>
+                Upload to map
+            </Button>
+        {/if}
+        <Button size="sm" color="green" outline type="button" class="w-32" on:click={() => {downloadData(info)}}>
+            Download Data
         </Button>
-    {:else}
-        <Button outline color="green" on:click={() => { handleUploadToMap(); }}>
-            Upload to map
-        </Button>
-    {/if}
+    </ButtonGroup>
 
 {/if}

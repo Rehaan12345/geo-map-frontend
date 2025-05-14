@@ -77,3 +77,39 @@ export async function getScrape(data) {
     return -1;
   }
 }
+
+//@ts-ignore
+
+// export function downloadCSV(dict, filename = 'data.csv') {
+//   if (!dict || typeof dict !== 'object') {
+//     console.error('Invalid input: not an object');
+//     return;
+//   }
+
+//   const items = Array.isArray(dict) ? dict : [dict]; // allow both single object or list of dicts
+//   const keys = Object.keys(items[0]);
+
+//   const csvRows = [
+//     keys.join(','), // header row
+//     ...items.map(item =>
+//       keys.map(k => {
+//         const val = item[k];
+//         return typeof val === 'string' && val.includes(',')
+//           ? `"${val.replace(/"/g, '""')}"`
+//           : val;
+//       }).join(',')
+//     )
+//   ];
+
+//   const csvContent = csvRows.join('\n');
+//   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+//   const url = URL.createObjectURL(blob);
+
+//   const a = document.createElement('a');
+//   a.setAttribute('href', url);
+//   a.setAttribute('download', filename);
+//   document.body.appendChild(a);
+//   a.click();
+//   document.body.removeChild(a);
+//   URL.revokeObjectURL(url);
+// }

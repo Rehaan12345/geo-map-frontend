@@ -11,16 +11,22 @@ import Overlay from 'ol/Overlay.js';
 import { addDocument, getDocuments } from '$lib/model';
 import { writable } from 'svelte/store';
 import { tick } from 'svelte';
+import { Modal } from 'flowbite-svelte';
+import MapModal from './MapModal.svelte';
 
 export let useCategory = "tech-companies";
 
 let ready = writable(false);
+
+let showMapModal = writable(false);
 
 const cambridge = fromLonLat([-71.10366950263109, 42.36596281768288]);
 const home = fromLonLat([-71.09893937618445, 42.366479045735595]);
 
 let map;
 let docs;
+
+let mapData;
 
 onMount(async () => {
 
@@ -128,6 +134,12 @@ async function addAllMarkers() {
 
 </style>
 
+<Modal class="min-w-full" open={$showMapModal} on:close={() => {showMapModal.set(false); }} size="xl">
+
+  <MapModal mapData={mapData}></MapModal>
+
+</Modal>
+
 <div id="map"></div>
 
 {#if $ready}
@@ -139,8 +151,8 @@ async function addAllMarkers() {
 
     {#each docs as d}
 
-      <div class="overlay dot" id={d.id}>{d.name}</div>
-      <div class="marker" id="marker-{d.id}" title="Marker"></div>
+      <button class="overlay dot" id={d.id}>{d.name}</button>
+      <button class="marker" aria-label={d.id} id="marker-{d.id}" title="Marker" on:click={() => {console.log(d); mapData = d; showMapModal.set(true); }}></button>
       
     {/each}
     
