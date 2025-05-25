@@ -11,8 +11,9 @@ import Overlay from 'ol/Overlay.js';
 import { addDocument, getDocuments } from '$lib/model';
 import { writable } from 'svelte/store';
 import { tick } from 'svelte';
-import { Modal } from 'flowbite-svelte';
+import { Modal, Spinner } from 'flowbite-svelte';
 import MapModal from './MapModal.svelte';
+import {HomeOutline} from "flowbite-svelte-icons"
 
 export let useCategory = "tech-companies";
 
@@ -116,20 +117,27 @@ async function addAllMarkers() {
 }
 
 .marker {
-  width: 20px;
-  height: 20px;
-  /* border: 1px solid #088; */
+  width: 30px;
+  height: 30px;
   border-radius: 10px;
-  background-color: rgb(255, 0, 0);
-  opacity: .7;
+  background-color: rgb(83, 126, 255);
+  opacity: .9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 
 .dot {
+  border: 1px solid black;
+  background-color: rgb(196, 210, 252);
   text-decoration: none;
   color: rgb(0, 0, 0);
   font-size: 11pt;
-  font-weight: bold;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Serif";
+  letter-spacing: .5px;
+  padding-left: .5rem;
+  padding-right: .5rem
 }
 
 </style>
@@ -151,8 +159,10 @@ async function addAllMarkers() {
 
     {#each docs as d}
 
-      <button class="overlay dot" id={d.id}>{d.name}</button>
-      <button class="marker" aria-label={d.id} id="marker-{d.id}" title="Marker" on:click={() => {console.log(d); mapData = d; showMapModal.set(true); }}></button>
+      <button class="overlay dot" id={d.id}>{d.title}</button>
+      <button class="marker" aria-label={d.id} id="marker-{d.id}" title="Marker" on:click={() => {console.log(d); mapData = d; showMapModal.set(true); }}>
+      <HomeOutline ></HomeOutline>
+      </button>
       
     {/each}
     
@@ -161,6 +171,6 @@ async function addAllMarkers() {
 
 {:else}
 
-<div class="NOTREADY">not ready yet</div>
+<div class="NOTREADY">Loading .. <Spinner color="red" size={4}/> </div>
 
 {/if}

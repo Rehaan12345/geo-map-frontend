@@ -35,7 +35,7 @@
             if (scrape.status == 0) {
                 data = scrape.data;
                 console.log(data);
-                info = data.info;
+                info = data;
                 console.log(info);
             }
         } catch (error) {
@@ -118,7 +118,7 @@
 				<Label for="searchamount" class="mb-2">Search Amount</Label>
 				<Input type="number" id="searchamount" placeholder="10" required bind:value={searchAmount}/>
 			</div>
-            <Toggle checked={headless} on:change={() => {headless = !headless}}>Watch it happen</Toggle>
+            <!-- <Toggle checked={headless} on:change={() => {headless = !headless}}>Watch it happen</Toggle> -->
             <div class="sm:col-span-2">
                 {#if $loading}
                     <Button type="submit" class="w-32" disabled>
